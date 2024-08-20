@@ -8,6 +8,25 @@ def "main setup" [] {
   # Check for Updates
   check_update;
 
+  # .gitignore
+  (generate
+    ".gitignore"
+    $".update-cache
+    env.json
+    "
+    4)
+
+  # Configure GitHub
+  (generate
+    "env.json"
+    $"{
+      "gh_actor": "username",
+      "gh_access": "personal-access-token-repo-admin"
+    }
+    "
+    4)
+
+
   # Configure Base
   main add-stage 10 "validate";
   main add-stage 20 "build";
@@ -89,6 +108,8 @@ def "main upgrade" [] {
   }
 }
 
+# GitHub Settings
+
 # Functs
 def handle_exit [exit_code: int, id: string] {
   if ($exit_code != 0) {
@@ -103,13 +124,15 @@ def generate [id: string, content: string, space: int = 6] {
   mkdir devops/git-hooks;
   let exists = $"./devops/($id)" | path exists;
   if ($exists == false) {
-    let x = $content | lines | each { |e| 
-      if ($e | str starts-with "#!") {
-        $"($e)"
+    mut result = [];
+    for $it in ($content | lines) {
+      if (($result | length) == 0) {
+        $result = ($result | append $"($it)")
       } else {
-        $"($e | str substring $space..)"
+        $result = ($result | append $"($it | str substring $space..)")
       }
-    } | str join "\n" | save -fp $"./devops/($id)";
+    }
+    $result | str join "\n" | save -fp $"./devops/($id)";
   }
 }
 
@@ -133,12 +156,6 @@ def check_update [] {
   if ($current_hash != $refresh_hash) {
     log warning $"task[setup]|An update to base devops tooling is available. please run 'nu ./devops.nu upgrade' to install.";
   }
-
-  # Add .gitignore for cache.
-  (generate
-    ".gitignore"
-    ".update-cache"
-    0)
 }
 
 # Expose
