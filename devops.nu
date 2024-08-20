@@ -12,7 +12,8 @@ def "main setup" [] {
   blank "ci"
 
   # Prepare Git Dev State
-
+  hook "pre-commit"
+  git config core.hooksPath "./devops/git-hooks"
 }
 
 # Upgrade
@@ -46,7 +47,6 @@ def main [] {
 # Utilities
 def blank [name: string] {
   mkdir devops
-  mkdir devops/git-hooks
   let exists = $"./devops/($name).nu" | path exists
   if ($exists == false) {
     [
@@ -55,5 +55,18 @@ def blank [name: string] {
       "",
       $"print ($name).nu"
     ] | str join "\n" | save -fp $"./devops/($name).nu"
+  }
+}
+
+def hook [name: string] {
+  mkdir devops/git-hooks
+  let exists = $"./devops/git-hooks/($name).nu" | path exists
+  if ($exists == false) {
+    [
+      $"#!/usr/bin/env nu",
+      $"# ($name).nu",
+      $"",
+      $"print ($name)"
+    ] | str join "\n" | save -fp $"./devops/git-hooks/($name)"
   }
 }
