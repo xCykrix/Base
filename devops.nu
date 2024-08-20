@@ -1,7 +1,7 @@
 #!/usr/bin/env nu
 # devops.nu
 
-use std log
+use std log;
 
 # Setup
 def "main setup" [] {
@@ -9,14 +9,75 @@ def "main setup" [] {
   check_update;
 
   # Configure Base
-  gitignore;
-  blank "stage-1" "validate";
-  blank "stage-2" "build";
-  blank "stage-99" "ci";
+  main add-stage 10 "validate";
+  main add-stage 20 "build";
+  main add-stage 30 "test";
+  main add-stage 99 "automation";
 
-  # Prepare Git Dev State
-  hook "pre-commit";
+  # Add Default Hooks
+  main add-hook "pre-commit";
+  main add-hook "commit-msg";
+
+  # Configure hooksPath
   git config core.hooksPath "./devops/git-hooks";
+}
+
+# Run Specified Stage
+def "main run-stage" [id: int, task: string = '-'] {
+  log info $"task[execute]|start = './devops/stage-($id).nu';";
+  nu $"./devops/stage-($id).nu";
+  let exit_code: int = $env.LAST_EXIT_CODE;
+  handle_exit $exit_code $"($task)";
+}
+
+# Add Stage
+def "main add-stage" [id: int, task: string] {
+  log info $"task[create]|stage add ($id) ($task)";
+  (generate
+    $"stage-($id).nu"
+    $'#!/usr/bin/env nu
+    # stage-($id).nu [($task)]
+
+    use std log
+
+    def main [] {
+      log info "stage-($id).nu [($task)]";
+
+      # Default Stage Error
+      log warning "default stage has not yet been configured"
+      error make --unspanned {
+        msg: "Failed to execute stage [($id)] '($task)'."
+        help: "Please review the above output to resolve this issue." 
+      };
+    }
+    '
+    4
+  )
+}
+
+# Add Hook
+def "main add-hook" [hook: string] {
+  log info $"hook[create]|hook add ($hook)";
+  (generate
+    $"git-hooks/($hook)"
+    $'#!/usr/bin/env nu
+    # git-hook: ($hook)
+
+    use std log;
+
+    def main [0?: string, 1?: string] {
+      log info "hook: ($hook)";
+
+      # Default Hook Error
+      log warning "default hook has not yet been configured"
+      error make --unspanned {
+        msg: "Failed to execute hook '($hook)'."
+        help: "Please review the above output to resolve this issue." 
+      };
+    }
+    '
+    4
+  )
 }
 
 # Upgrade
@@ -28,27 +89,6 @@ def "main upgrade" [] {
   }
 }
 
-def "main validate" [] {
-  log info $"task[validate]|start = stage-1.nu";
-  nu "./devops/stage-1.nu";
-  let exit_code: int = $env.LAST_EXIT_CODE;
-  handle_exit $exit_code "validate";
-}
-
-def "main build" [] {
-  log info $"task[build]|start = stage-2.nu";
-  nu "./devops/stage-2.nu";
-  let exit_code: int = $env.LAST_EXIT_CODE;
-  handle_exit $exit_code "build";
-}
-
-def "main ci" [] {
-  log info $"task[ci]|start = stage-99.nu";
-  nu "./devops/stage-99.nu";
-  let exit_code: int = $env.LAST_EXIT_CODE;
-  handle_exit $exit_code "ci";
-}
-
 # Functs
 def handle_exit [exit_code: int, id: string] {
   if ($exit_code != 0) {
@@ -58,59 +98,47 @@ def handle_exit [exit_code: int, id: string] {
   exit 0;
 }
 
+# Generate File from ID, Content, and Space Count
+def generate [id: string, content: string, space: int = 6] {
+  mkdir devops/git-hooks;
+  let exists = $"./devops/($id)" | path exists;
+  if ($exists == false) {
+    let x = $content | lines | each { |e| 
+      if ($e | str starts-with "#!") {
+        $"($e)"
+      } else {
+        $"($e | str substring $space..)"
+      }
+    } | str join "\n" | save -fp $"./devops/($id)";
+  }
+}
+
 # Check for Updates with Caching
 def check_update [] {
   mkdir devops;
+
+  # Calculate Hashes
   let current_hash: string = (open "./devops.nu" | hash sha256 | into string);
   mut refresh_hash = "TO_BE_CALCULATED";
+
+  # Hit Cache or Fetch Remote
   if (($"./devops/.update-cache" | path exists) and ((ls $"./devops/.update-cache" | get 0.modified) > ((date now) - 15min))) {
     $refresh_hash = (open "./devops/.update-cache" | into string);
   } else {
     $refresh_hash = (http get "https://raw.githubusercontent.com/xCykrix/Base/main/devops.nu" | hash sha256 | into string);
     $refresh_hash | save -fp $"./devops/.update-cache";
   }
+
+  # Diff
   if ($current_hash != $refresh_hash) {
     log warning $"task[setup]|An update to base devops tooling is available. please run 'nu ./devops.nu upgrade' to install.";
   }
-}
 
-# Create .gitignore File for devops
-def gitignore [] {
-  mkdir devops;
-  let exists = $"./devops/.gitignore" | path exists;
-  if ($exists == false) {
-    [
-      $".update-cache"
-    ] | str join "\n" | save -fp $"./devops/.gitignore";
-  }
-}
-
-# Create Blank Script File with Comment
-def blank [name: string, comment: string] {
-  mkdir devops;
-  let exists = $"./devops/($name).nu" | path exists;
-  if ($exists == false) {
-    [
-      $"#!/usr/bin/env nu",
-      $"# ($name).nu",
-      "",
-      $"print \"($name).nu - ($comment)\""
-    ] | str join "\n" | save -fp $"./devops/($name).nu";
-  }
-}
-
-# Create Blank Hook
-def hook [name: string] {
-  mkdir devops/git-hooks;
-  let exists = $"./devops/git-hooks/($name).nu" | path exists;
-  if ($exists == false) {
-    [
-      $"#!/usr/bin/env nu",
-      $"# ($name).nu",
-      $"",
-      $"print \"($name) - complete\""
-    ] | str join "\n" | save -fp $"./devops/git-hooks/($name)";
-  }
+  # Add .gitignore for cache.
+  (generate
+    ".gitignore"
+    ".update-cache"
+    0)
 }
 
 # Expose

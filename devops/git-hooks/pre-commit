@@ -1,4 +1,14 @@
 #!/usr/bin/env nu
-# pre-commit.nu
+# git-hook: pre-commit
 
-print "pre-commit - complete"
+use std log;
+
+def main [0?: string, 1?: string] {
+  log info "pre-commit";
+
+  # Default Hook Error
+  log warning "default hook has not yet been configured"
+  nu devops.nu run-stage 10;
+  nu devops.nu run-stage 20;
+  nu devops.nu run-stage 30;
+}
