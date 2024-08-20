@@ -21,7 +21,11 @@ def "main setup" [] {
 
 # Upgrade
 def "main upgrade" [] {
-  http get "https://raw.githubusercontent.com/xCykrix/Base/main/devops.nu" | save -fp "devops.upgrade.nu";
+  if ($env.PWD | str ends-with 'Base') {
+    log warning $"task[setup]|Local guard triggered. This is the origin of devops.nu and upgrade should not be called here.";
+  } else {
+    http get "https://raw.githubusercontent.com/xCykrix/Base/main/devops.nu" | save -fp "devops.nu";
+  }
 }
 
 def "main validate" [] {
