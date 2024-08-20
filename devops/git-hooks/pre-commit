@@ -1,4 +1,4 @@
 #!/usr/bin/env nu
 # pre-commit.nu
 
-print pre-commit
+print "pre-commit - complete"
