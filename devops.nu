@@ -7,9 +7,9 @@ mut set = false;
 # Setup
 def "main setup" [] {
   # Configure Base
-  blank "lint"
-  blank "build"
-  blank "ci"
+  blank "stage-1.lint"
+  blank "stage-2.build"
+  blank "stage-3.ci"
 
   # Prepare Git Dev State
   hook "pre-commit"
@@ -22,15 +22,15 @@ def "main upgrade" [] {
 }
 
 def "main lint" [] {
-  nu "./devops/lint.nu" | complete 
+  nu "./devops/stage-1.lint.nu" | complete 
 }
 
 def "main build" [] {
-  nu "./devops/build.nu" | complete
+  nu "./devops/stage-2.build.nu" | complete
 }
 
 def "main ci" [] {
-  nu "./devops/ci.nu" | complete
+  nu "./devops/stage-3.ci.nu" | complete
 }
 
 # Quick Wrapper - All Functs
