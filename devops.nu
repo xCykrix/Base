@@ -6,14 +6,14 @@ use std log;
 
 # module
 use "./devops-bin/execute.nu" [can_execute];
-use "./devops-bin/file.nu" [add, setup_file];
-use "./devops-bin/github.nu" [];
+use "./devops-bin/file.nu" [add, setup_filesystem];
+use "./devops-bin/github.nu" [get, post, put, patch, delete, env];
 use "./devops-bin/handle.nu" [fexit];
 
 ### --- Setup State --- ###
 def "main setup" [] {
   can_execute "git" true;
-  setup_file;
+  setup_filesystem;
   
   # Configure Base
   main add-stage 10 "validate";
@@ -30,35 +30,33 @@ def "main setup" [] {
 }
 
 ### --- Execute a stage --- ###
-def "main run-stage" [id: int, task: string = '-'] {
-  # update_state;
-  
-  # log info $"task[execute]|start = './devops/stage-($id).nu';";
-  # nu $"./devops/stage-($id).nu";
-  # let exit_code: int = $env.LAST_EXIT_CODE;
-  # handle_exit $exit_code $"($task)";
+def "main run-stage" [id: int, description: string = '-'] {
+  log info $"run-stage|start = './devops/stage-($id).nu';";
+  nu $"./devops-conf/stage-($id).nu";
+  let exit_code: int = $env.LAST_EXIT_CODE;
+  handle_exit $exit_code $description;
 }
 
 ### --- Create a stage --- ###
-def "main add-stage" [id: int, task: string] {
-  setup_file;
+def "main add-stage" [id: int, description: string] {
+  setup_filesystem;
   
-  log info $"task[create]|stage add ($id) ($task)";
+  log info $"add-stage|($id) ($description)";
   (add
     $"devops-conf"
     $"stage-($id).nu"
     $'#!/usr/bin/env nu
-      # stage-($id).nu [($task)]
+      # stage-($id).nu [($description)]
 
       use std log
 
       def main [] {
-        log info "stage-($id).nu [($task)]";
+        log info "stage-($id).nu [($description)]";
 
         # Default Stage Error
         log warning "default stage has not yet been configured"
         error make --unspanned {
-          msg: "Failed to execute stage [($id)] '($task)'."
+          msg: "Failed to execute stage [($id)] '($description)'."
           help: "Please review the above output to resolve this issue." 
         };
       }' 6)
@@ -66,7 +64,7 @@ def "main add-stage" [id: int, task: string] {
 
 ### --- Create a git-hook --- ###
 def "main add-hook" [hook: string] {
-  setup_file;
+  setup_filesystem;
   
   log info $"hook[create]|hook add ($hook)";
   (add
@@ -102,9 +100,9 @@ def "main upgrade" [] {
 
 ### --- Sync Settings to GitHub Repository --- ###
 def "main update-github" [] {
-  update_state;
+  setup_filesystem;
+  env;
   
-
 
   let search = (git remote get-url origin | into string | parse --regex '(?:https://|git@)github.com[/:]{1}([A-Za-z0-9]{1,})/([A-Za-z0-9]{1,})(?:.git)?')
   if (($search | length) == 0) {

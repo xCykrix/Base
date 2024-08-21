@@ -1,5 +1,5 @@
 
-export def setup_file [] {
+export def setup_filesystem [] {
   mkdir devops-conf
   mkdir git-hooks
   mkdir .github
@@ -22,8 +22,8 @@ export def setup_file [] {
       }' 6)
 }
 
-export def add [path: string, id: string, content: string, space: int = 6] {
-  let exists = $"./($path)/($id)" | path exists;
+export def add [path: string, name: string, content: string, space: int = 6] {
+  let exists = $"./($path)/($name)" | path exists;
   if ($exists == false) {
     mut result = [];
     for $it in ($content | lines) {
@@ -33,6 +33,6 @@ export def add [path: string, id: string, content: string, space: int = 6] {
         $result = ($result | append $"($it | str substring $space..)")
       }
     }
-    $result | str join "\n" | save -fp $"./($path)/($id)";
+    $result | str join "\n" | save -fp $"./($path)/($name)";
   }
 }

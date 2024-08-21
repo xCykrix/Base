@@ -8,8 +8,8 @@
 
     # Default Hook Error
     log warning "default hook has not yet been configured"
-    error make --unspanned {
-      msg: "Failed to execute hook 'commit-msg'."
-      help: "Please review the above output to resolve this issue." 
-    };
+    # error make --unspanned {
+    #   msg: "Failed to execute hook 'commit-msg'."
+    #   help: "Please review the above output to resolve this issue." 
+    # };
   }
