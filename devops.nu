@@ -26,7 +26,7 @@ def "main setup" [] {
   main add-hook "commit-msg";
 
   # Configure hooksPath
-  git config core.hooksPath "./devops-conf/git-hooks";
+  git config core.hooksPath "./git-hooks";
 }
 
 ### --- Execute a stage --- ###
