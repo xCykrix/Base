@@ -1,32 +1,20 @@
 #!/usr/bin/env nu
 # devops.nu
 
+# std
 use std log;
 
-# Setup
+# module
+use "./devops-bin/execute.nu" [can_execute];
+use "./devops-bin/file.nu" [add, setup_file];
+use "./devops-bin/github.nu" [];
+use "./devops-bin/handle.nu" [fexit];
+
+### --- Setup State --- ###
 def "main setup" [] {
-  # Check for Updates
-  check_update;
-
-  # .gitignore
-  (generate
-    ".gitignore"
-    $".update-cache
-    env.json
-    "
-    4)
-
-  # Configure GitHub
-  (generate
-    "env.json"
-    $"{
-      "gh_actor": "username",
-      "gh_access": "personal-access-token-repo-admin"
-    }
-    "
-    4)
-
-
+  can_execute "git" true;
+  setup_file;
+  
   # Configure Base
   main add-stage 10 "validate";
   main add-stage 20 "build";
@@ -38,126 +26,92 @@ def "main setup" [] {
   main add-hook "commit-msg";
 
   # Configure hooksPath
-  git config core.hooksPath "./devops/git-hooks";
+  git config core.hooksPath "./devops-conf/git-hooks";
 }
 
-# Run Specified Stage
+### --- Execute a stage --- ###
 def "main run-stage" [id: int, task: string = '-'] {
-  log info $"task[execute]|start = './devops/stage-($id).nu';";
-  nu $"./devops/stage-($id).nu";
-  let exit_code: int = $env.LAST_EXIT_CODE;
-  handle_exit $exit_code $"($task)";
+  # update_state;
+  
+  # log info $"task[execute]|start = './devops/stage-($id).nu';";
+  # nu $"./devops/stage-($id).nu";
+  # let exit_code: int = $env.LAST_EXIT_CODE;
+  # handle_exit $exit_code $"($task)";
 }
 
-# Add Stage
+### --- Create a stage --- ###
 def "main add-stage" [id: int, task: string] {
+  setup_file;
+  
   log info $"task[create]|stage add ($id) ($task)";
-  (generate
+  (add
+    $"devops-conf"
     $"stage-($id).nu"
     $'#!/usr/bin/env nu
-    # stage-($id).nu [($task)]
+      # stage-($id).nu [($task)]
 
-    use std log
+      use std log
 
-    def main [] {
-      log info "stage-($id).nu [($task)]";
+      def main [] {
+        log info "stage-($id).nu [($task)]";
 
-      # Default Stage Error
-      log warning "default stage has not yet been configured"
-      error make --unspanned {
-        msg: "Failed to execute stage [($id)] '($task)'."
-        help: "Please review the above output to resolve this issue." 
-      };
-    }
-    '
-    4
-  )
+        # Default Stage Error
+        log warning "default stage has not yet been configured"
+        error make --unspanned {
+          msg: "Failed to execute stage [($id)] '($task)'."
+          help: "Please review the above output to resolve this issue." 
+        };
+      }' 6)
 }
 
-# Add Hook
+### --- Create a git-hook --- ###
 def "main add-hook" [hook: string] {
+  setup_file;
+  
   log info $"hook[create]|hook add ($hook)";
-  (generate
-    $"git-hooks/($hook)"
+  (add
+    $"git-hooks"
+    $"($hook)"
     $'#!/usr/bin/env nu
-    # git-hook: ($hook)
+      # git-hook: ($hook)
 
-    use std log;
+      use std log;
 
-    def main [0?: string, 1?: string] {
-      log info "hook: ($hook)";
+      def main [0?: string, 1?: string] {
+        log info "hook: ($hook)";
 
-      # Default Hook Error
-      log warning "default hook has not yet been configured"
-      error make --unspanned {
-        msg: "Failed to execute hook '($hook)'."
-        help: "Please review the above output to resolve this issue." 
-      };
-    }
-    '
-    4
-  )
+        # Default Hook Error
+        log warning "default hook has not yet been configured"
+        error make --unspanned {
+          msg: "Failed to execute hook '($hook)'."
+          help: "Please review the above output to resolve this issue." 
+        };
+      }' 4)
 }
 
-# Upgrade
+### --- Upgrade Script from GitHub --- ###
 def "main upgrade" [] {
-  if ($env.PWD | str ends-with 'Base') {
-    log warning $"task[setup]|Local guard triggered. This is the origin of devops.nu and upgrade should not be called here.";
-  } else {
-    http get "https://raw.githubusercontent.com/xCykrix/Base/main/devops.nu" | save -fp "devops.nu";
+  # update_state;
+  
+  # if ($env.PWD | str ends-with 'Base') {
+  #   log warning $"task[setup]|Local guard triggered. This is the origin of devops.nu and upgrade should not be called here.";
+  # } else {
+  #   http get "https://raw.githubusercontent.com/xCykrix/Base/main/devops.nu" | save -fp "devops.nu";
+  # }
+}
+
+### --- Sync Settings to GitHub Repository --- ###
+def "main update-github" [] {
+  update_state;
+  
+
+
+  let search = (git remote get-url origin | into string | parse --regex '(?:https://|git@)github.com[/:]{1}([A-Za-z0-9]{1,})/([A-Za-z0-9]{1,})(?:.git)?')
+  if (($search | length) == 0) {
+    return (print $"Invalid 'git remote get-url origin' response. Found '($search)'");
   }
 }
 
-# GitHub Settings
-
-# Functs
-def handle_exit [exit_code: int, id: string] {
-  if ($exit_code != 0) {
-    log error $"task[($id)]|failed to execute task with exit code of ($exit_code)";
-    exit $exit_code;
-  }
-  exit 0;
-}
-
-# Generate File from ID, Content, and Space Count
-def generate [id: string, content: string, space: int = 6] {
-  mkdir devops/git-hooks;
-  let exists = $"./devops/($id)" | path exists;
-  if ($exists == false) {
-    mut result = [];
-    for $it in ($content | lines) {
-      if (($result | length) == 0) {
-        $result = ($result | append $"($it)")
-      } else {
-        $result = ($result | append $"($it | str substring $space..)")
-      }
-    }
-    $result | str join "\n" | save -fp $"./devops/($id)";
-  }
-}
-
-# Check for Updates with Caching
-def check_update [] {
-  mkdir devops;
-
-  # Calculate Hashes
-  let current_hash: string = (open "./devops.nu" | hash sha256 | into string);
-  mut refresh_hash = "TO_BE_CALCULATED";
-
-  # Hit Cache or Fetch Remote
-  if (($"./devops/.update-cache" | path exists) and ((ls $"./devops/.update-cache" | get 0.modified) > ((date now) - 15min))) {
-    $refresh_hash = (open "./devops/.update-cache" | into string);
-  } else {
-    $refresh_hash = (http get "https://raw.githubusercontent.com/xCykrix/Base/main/devops.nu" | hash sha256 | into string);
-    $refresh_hash | save -fp $"./devops/.update-cache";
-  }
-
-  # Diff
-  if ($current_hash != $refresh_hash) {
-    log warning $"task[setup]|An update to base devops tooling is available. please run 'nu ./devops.nu upgrade' to install.";
-  }
-}
-
-# Expose
+### --- Expose Entrypoints  --- ###
 def main [] {
 }

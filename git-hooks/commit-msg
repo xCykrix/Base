@@ -1,0 +1,15 @@
+#!/usr/bin/env nu
+  # git-hook: commit-msg
+
+  use std log;
+
+  def main [0?: string, 1?: string] {
+    log info "hook: commit-msg";
+
+    # Default Hook Error
+    log warning "default hook has not yet been configured"
+    error make --unspanned {
+      msg: "Failed to execute hook 'commit-msg'."
+      help: "Please review the above output to resolve this issue." 
+    };
+  }
