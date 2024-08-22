@@ -6,13 +6,13 @@ use std log;
 
 # module
 use "./devops-bin/execute.nu" [can_execute];
-use "./devops-bin/file.nu" [add, setup_filesystem];
+use "./devops-bin/file.nu" [add, conf];
 use "./devops-bin/handle.nu" [fexit];
 
 ### --- Setup State --- ###
 def "main setup" [] {
   can_execute "git" true;
-  setup_filesystem;
+  conf;
   
   # Configure Base
   main add-stage 10 "validate";
@@ -38,7 +38,7 @@ def "main run-stage" [id: int, description: string = '-'] {
 
 ### --- Create a stage --- ###
 def "main add-stage" [id: int, description: string] {
-  setup_filesystem;
+  conf;
   
   log info $"add-stage|($id) ($description)";
   (add
@@ -63,7 +63,7 @@ def "main add-stage" [id: int, description: string] {
 
 ### --- Create a git-hook --- ###
 def "main add-hook" [hook: string] {
-  setup_filesystem;
+  conf;
   
   log info $"hook[create]|hook add ($hook)";
   (add
@@ -99,7 +99,7 @@ def "main upgrade" [] {
 
 ### --- Sync Settings to GitHub Repository --- ###
 def "main update-github" [] {
-  setup_filesystem;
+  conf;
 
   let search = (git remote get-url origin | into string | parse --regex '(?:https://|git@)github.com[/:]{1}([A-Za-z0-9]{1,})/([A-Za-z0-9]{1,})(?:.git)?')
   if (($search | length) == 0) {

@@ -1,5 +1,5 @@
 
-export def setup_filesystem [] {
+export def conf [] {
   mkdir devops-conf
   mkdir git-hooks
   mkdir .github
