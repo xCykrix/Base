@@ -9,17 +9,6 @@ export def setup_filesystem [] {
     "devops-conf"
     ".gitignore"
     $'env.jsonc' 6)
-
-  # Configure GitHub
-  (add
-    "devops-conf"
-    "env.jsonc"
-    $'{
-        // Github Username.
-        "github_user": "x",
-        // Github Personal Access Token with Repository Admin Access.
-        "github_token": "x"
-      }' 6)
 }
 
 export def add [path: string, name: string, content: string, space: int = 6] {

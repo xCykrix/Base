@@ -7,7 +7,6 @@ use std log;
 # module
 use "./devops-bin/execute.nu" [can_execute];
 use "./devops-bin/file.nu" [add, setup_filesystem];
-use "./devops-bin/github.nu" [get, post, put, patch, delete, env];
 use "./devops-bin/handle.nu" [fexit];
 
 ### --- Setup State --- ###
@@ -101,13 +100,13 @@ def "main upgrade" [] {
 ### --- Sync Settings to GitHub Repository --- ###
 def "main update-github" [] {
   setup_filesystem;
-  env;
-  
 
   let search = (git remote get-url origin | into string | parse --regex '(?:https://|git@)github.com[/:]{1}([A-Za-z0-9]{1,})/([A-Za-z0-9]{1,})(?:.git)?')
   if (($search | length) == 0) {
     return (print $"Invalid 'git remote get-url origin' response. Found '($search)'");
   }
+
+  
 }
 
 ### --- Expose Entrypoints  --- ###
