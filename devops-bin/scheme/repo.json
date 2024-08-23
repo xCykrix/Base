@@ -33,6 +33,5 @@
     "squash_merge_commit_title": "COMMIT_OR_PR_TITLE",
     "merge_commit_message": "PR_TITLE",
     "merge_commit_title": "MERGE_MESSAGE",
-    "web_commit_signoff_required": true,
-    "visibility": "public"
+    "web_commit_signoff_required": true
 }

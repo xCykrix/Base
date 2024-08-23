@@ -106,9 +106,10 @@ def "main update-github" [] {
     return (log error $"Invalid 'git remote get-url origin' response. Found '($detail)' but expected a git compatbile uri.");
   }
 
+  # Base APIs
   gh api -X PATCH "/repos/{owner}/{repo}" --input devops-bin/scheme/repo.json;
   gh api -X PUT "/repos/{owner}/{repo}/branches/main/protection" --input devops-bin/scheme/branch-protection.json;
-  gh API -X POST "/repos/{owner}/{repo}/branches/main/protection/required_signatures"
+  gh api -X POST "/repos/{owner}/{repo}/branches/main/protection/required_signatures"
 }
 
 ### --- Expose Entrypoints  --- ###
