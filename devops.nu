@@ -47,13 +47,13 @@ def "main add-stage" [id: int, description: string] {
     $'#!/usr/bin/env nu
       # stage-($id).nu [($description)]
 
-      use std log
+      use std log;
 
       def main [] {
         log info "stage-($id).nu [($description)]";
 
         # Default Stage Error
-        log warning "default stage has not yet been configured"
+        log warning "stage behavior has not yet been configured";
         error make --unspanned {
           msg: "Failed to execute stage [($id)] '($description)'."
           help: "Please review the above output to resolve this issue." 
@@ -78,7 +78,7 @@ def "main add-hook" [hook: string] {
         log info "hook: ($hook)";
 
         # Default Hook Error
-        log warning "default hook has not yet been configured"
+        log warning "hook behavior has not yet been configured";
         error make --unspanned {
           msg: "Failed to execute hook '($hook)'."
           help: "Please review the above output to resolve this issue." 
@@ -101,12 +101,14 @@ def "main upgrade" [] {
 def "main update-github" [] {
   conf;
 
-  let search = (git remote get-url origin | into string | parse --regex '(?:https://|git@)github.com[/:]{1}([A-Za-z0-9]{1,})/([A-Za-z0-9]{1,})(?:.git)?')
-  if (($search | length) == 0) {
-    return (print $"Invalid 'git remote get-url origin' response. Found '($search)'");
+  let detail = (git remote get-url origin | into string | parse --regex '(?:https://|git@)github.com[/:]{1}([A-Za-z0-9]{1,})/([A-Za-z0-9]{1,})(?:.git)?')
+  if (($detail | length) == 0) {
+    return (log error $"Invalid 'git remote get-url origin' response. Found '($detail)' but expected a git compatbile uri.");
   }
 
-  
+  gh api -X PATCH "/repos/{owner}/{repo}" --input devops-bin/scheme/repo.json;
+  gh api -X PUT "/repos/{owner}/{repo}/branches/main/protection" --input devops-bin/scheme/branch-protection.json;
+  gh API -X POST "/repos/{owner}/{repo}/branches/main/protection/required_signatures"
 }
 
 ### --- Expose Entrypoints  --- ###
