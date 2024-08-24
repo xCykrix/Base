@@ -13,7 +13,7 @@ use "./devops-bin/handle.nu" [fexit];
 def "main setup" [] {
   can_execute "git" true;
   conf;
-  
+
   # Configure Base
   main add-stage 10 "validate";
   main add-stage 20 "build";
@@ -26,6 +26,7 @@ def "main setup" [] {
 
   # Configure hooksPath
   git config core.hooksPath "./git-hooks";
+  main update-github;
 }
 
 ### --- Execute a stage --- ###
@@ -39,7 +40,7 @@ def "main run-stage" [id: int, description: string = '-'] {
 ### --- Create a stage --- ###
 def "main add-stage" [id: int, description: string] {
   conf;
-  
+
   log info $"add-stage|($id) ($description)";
   (add
     $"devops-conf"
@@ -56,7 +57,7 @@ def "main add-stage" [id: int, description: string] {
         log warning "stage behavior has not yet been configured";
         error make --unspanned {
           msg: "Failed to execute stage [($id)] '($description)'."
-          help: "Please review the above output to resolve this issue." 
+          help: "Please review the above output to resolve this issue."
         };
       }' 6)
 }
@@ -64,7 +65,7 @@ def "main add-stage" [id: int, description: string] {
 ### --- Create a git-hook --- ###
 def "main add-hook" [hook: string] {
   conf;
-  
+
   log info $"hook[create]|hook add ($hook)";
   (add
     $"git-hooks"
@@ -81,20 +82,14 @@ def "main add-hook" [hook: string] {
         log warning "hook behavior has not yet been configured";
         error make --unspanned {
           msg: "Failed to execute hook '($hook)'."
-          help: "Please review the above output to resolve this issue." 
+          help: "Please review the above output to resolve this issue."
         };
       }' 4)
 }
 
 ### --- Upgrade Script from GitHub --- ###
 def "main upgrade" [] {
-  # update_state;
-  
-  # if ($env.PWD | str ends-with 'Base') {
-  #   log warning $"task[setup]|Local guard triggered. This is the origin of devops.nu and upgrade should not be called here.";
-  # } else {
-  #   http get "https://raw.githubusercontent.com/xCykrix/Base/main/devops.nu" | save -fp "devops.nu";
-  # }
+
 }
 
 ### --- Sync Settings to GitHub Repository --- ###
@@ -107,9 +102,41 @@ def "main update-github" [] {
   }
 
   # Base APIs
-  gh api -X PATCH "/repos/{owner}/{repo}" --input devops-bin/scheme/repo.json;
-  gh api -X PUT "/repos/{owner}/{repo}/branches/main/protection" --input devops-bin/scheme/branch-protection.json;
-  gh api -X POST "/repos/{owner}/{repo}/branches/main/protection/required_signatures"
+  gh api -X PATCH "/repos/{owner}/{repo}" --input devops-bin/scheme/repo.json | from json;
+  gh api -X PUT "/repos/{owner}/{repo}/branches/main/protection" --input devops-bin/scheme/branch-protection.json | from json;
+  gh api -X POST "/repos/{owner}/{repo}/branches/main/protection/required_signatures" | from json;
+
+  # Label states.
+  let expected = open devops-bin/scheme/label.json;
+  let current = (gh label list --json name,color) | from json;
+  mut create = [];
+  mut delete = [];
+
+  # If no labels, assume create all and no deletion is needed.
+  if ($current == null) {
+    $create = $create | append $expected;
+  } else {
+    # Parse expected labels against current labels for create.
+    for elabel in $expected {
+      if (($current | find --regex $"^($elabel.name)$" | length) == 0) {
+        $create = ($create | append $elabel);
+      }
+    }
+    # Parse current labels against expected labels for delete.
+    for clabel in $current {
+      if (($expected | find --regex $"^($clabel.name)$" | length) == 0) {
+        $delete = ($delete | append $clabel);
+      }
+    }
+  }
+
+  # Create and Delete Labels
+  for label in $create {
+    gh label create $label.name --color ($label.color | str replace '#' '');
+  }
+  for label in $delete {
+    gh label delete --yes $label.name;
+  }
 }
 
 ### --- Expose Entrypoints  --- ###
