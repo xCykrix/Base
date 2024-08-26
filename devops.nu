@@ -39,7 +39,7 @@ def "main run-stage" [id: int, description: string = '-'] {
   log info $"run-stage|start = './devops/stage-($id).nu';";
   nu $"./devops-conf/stage-($id).nu";
   let exit_code: int = $env.LAST_EXIT_CODE;
-  handle_exit $exit_code $description;
+  fexit $exit_code $description;
 }
 
 ### --- Create a stage --- ###
