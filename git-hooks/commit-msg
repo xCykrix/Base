@@ -9,7 +9,7 @@ def main [0?: string, 1?: string] {
   log info "git-hook[commit-msg]";
 
   # Read Message
-  let message: string = (open $0 | into string);
+  let message: string = (open $0 | into string | str trim);
   print "";
   print $message;
   print "";
