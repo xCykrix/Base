@@ -17,6 +17,7 @@ def main [] {
   cp -rv $"($temp)/devops.nu" .;
   cp -rv $"($temp)/devops-install.nu" .;
   cp -rv $"($temp)/git-hooks/commit-msg" ./git-hooks/commit-msg;
+  rm ./devops-install.nu;
   log info "Base devops.nu and devops-bin have been installed and updated. Running setup.";
   nu ./devops.nu setup;
 }
