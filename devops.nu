@@ -27,6 +27,11 @@ def "main setup" [] {
   # Configure hooksPath
   git config core.hooksPath "./git-hooks";
   main update-github;
+
+  # chmod
+  if ((can_execute "chmod" false) == true) {
+    chmod +x git-hooks/*
+  }
 }
 
 ### --- Execute a stage --- ###
