@@ -9,5 +9,5 @@ Requires nushell. Period. https://www.nushell.sh
 1. Install nushell and enter the terminal.
 2. Execute
 ```nu
-$ 
+$ http get https://raw.githubusercontent.com/xCykrix/Base/main/devops-install.nu | save -fp devops-install.nu | nu devops-install.nu
 ```
