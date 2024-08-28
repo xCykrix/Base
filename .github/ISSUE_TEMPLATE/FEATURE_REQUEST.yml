@@ -1,0 +1,52 @@
+name: "Feature Request 🔧"
+description: Have an idea? Share it!
+title: "(FEAT): ..."
+labels: ["Type: Enhancement", "Meta: Conversation"]
+ssignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking he time to reach out and suggest new features for this project!
+        Please feel free to browse existing issues to see if this request exists already as well.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Request Context
+      description: |
+        Please provide a detailed description of this request, the root issue it would solve, and what you expect this to do.
+        If a relevant existing feature exists, please note it for the possibility to expand on that respective module.
+    validations:
+      required: true
+
+  - type: textarea
+    id: implement
+    attributes:
+      label: Implementation and Usage
+      description: |
+        Please provide a brief ovelay of how you would like to see this implemented as a starting point.
+        This can be application examples, pseudo code, or image depictions.
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra-information
+    attributes:
+      label: Extra Information
+      description: Please provide any other information such as log files, screenshots, etc; if applicable.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: affirmations
+    attributes:
+      label: Please affirm the following options.
+      description: Affirmations are required for your issue to be triaged and resolved.
+      options:
+        - label: I Agree to the [Code of Conduct](./CODE_OF_CONDUCT.md)
+          required: true
+        - label: I Agree to the [Contributing Guidelines](./CONTRIBUTING.md)
+          required: true
+        - label: I Agree to the [Security Reporting Guidelines](./SECURITY.md)
+          required: true

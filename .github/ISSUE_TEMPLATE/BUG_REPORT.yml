@@ -1,7 +1,7 @@
 
 name: "Bug Report 🐛"
 description: Found an issue? Report it!
-title: "(BUG): "
+title: "(BUG): ..."
 labels: ["Type: Bug", "Meta: Conversation"]
 assignees: ["xCykrix"]
 body:
@@ -15,7 +15,7 @@ body:
     id: description
     attributes:
       label: Report Context
-      description: Please provide a brief description of the root issue, what happened, and what should have happened.
+      description: Please provide a detailed description of the root issue, what happened, and what should have happened.
     validations:
       required: true
 
@@ -32,6 +32,7 @@ body:
     attributes:
       label: System Environment
       description: Please provide details about the system running into this issue. Details such as the OS, Host Version, etc. can be useful.
+      placeholder: Windows 10 - Version	10.0.19045 Build 19045, NixOS 24.05, etc.
     validations:
       required: true
 
@@ -50,7 +51,7 @@ body:
   - type: textarea
     id: exception
     attributes:
-      label: Error/Stack Trace
+      label: Error Message
       description: Please provide a full error message or stack trace; if applicable.
     validations:
       required: false
@@ -67,11 +68,11 @@ body:
     id: affirmations
     attributes:
       label: Please affirm the following options.
-      description: Affirmations may be required for your issue to be triaged and resolved.
+      description: Affirmations are required for your issue to be triaged and resolved.
       options:
-        - label: I Agree to the Code of Conduct
+        - label: I Agree to the [Code of Conduct](./CODE_OF_CONDUCT.md)
           required: true
-        - label: I Agree to the Contribution Guidelines
+        - label: I Agree to the [Contributing Guidelines](./CONTRIBUTING.md)
           required: true
-        - label: I Agree to the Security Reporting Guidelines
+        - label: I Agree to the [Security Reporting Guidelines](./SECURITY.md)
           required: true
