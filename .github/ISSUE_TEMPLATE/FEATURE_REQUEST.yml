@@ -2,7 +2,7 @@ name: "Feature Request 🔧"
 description: Have an idea? Share it!
 title: "(FEAT): ..."
 labels: ["Type: Enhancement", "Meta: Conversation"]
-ssignees: []
+assignees: [xCykrix]
 body:
   - type: markdown
     attributes:
