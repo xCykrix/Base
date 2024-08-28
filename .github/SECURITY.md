@@ -33,6 +33,4 @@ You will never share too much information to us.
 
 ## After Submission
 
-Once reviewed, the clock begins for us. We will begin to assess the impact
-
-TODO
+Once reviewed, the clock begins for us. We will begin to assess the impact and ...

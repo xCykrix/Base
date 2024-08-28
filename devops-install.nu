@@ -16,6 +16,8 @@ def main [] {
   cp -rv $"($temp)/devops-bin" .;
   cp -rv $"($temp)/devops.nu" .;
   cp -rv $"($temp)/devops-install.nu" .;
+
+  cp -rv $"($temp)/.github" .;
   cp -rv $"($temp)/.editorconfig" .;
   cp -rv $"($temp)/git-hooks/commit-msg" ./git-hooks/commit-msg;
   rm ./devops-install.nu;

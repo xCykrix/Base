@@ -26,7 +26,7 @@ body:
       label: Implementation and Usage
       description: |
         Please provide a brief ovelay of how you would like to see this implemented as a starting point.
-        This can be application examples, pseudo code, or image depictions.
+        This can be a detailed description, application examples, pseudo code, or image depictions.
     validations:
       required: true
 
