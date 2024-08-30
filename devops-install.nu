@@ -7,12 +7,13 @@ use std log;
 ### --- Expose Entrypoints  --- ###
 def main [] {
   if ($env.PWD | str ends-with 'Base') {
-    return (log warning $"Local guard triggered. This is the origin of devops.nu and upgrade should not be called here.");
+    return (log warning $"Local guard triggered. This is the origin of devops.nu and upgrade should not be called here. [ends-with 'Base']");
   }
 
   let temp = (mktemp -d)
   git clone https://github.com/xCykrix/Base.git $temp;
   mkdir git-hooks;
+
   cp -rv $"($temp)/devops-bin" .;
   cp -rv $"($temp)/devops.nu" .;
   cp -rv $"($temp)/devops-install.nu" .;

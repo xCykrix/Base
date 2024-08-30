@@ -1,5 +1,9 @@
 #!/usr/bin/env nu
-  # git-hook: commit-msg
+# git-hook: commit-msg
+
+###
+### This file is digested by downstream repostories for global commit validation. Please verify integrity and do not change unless required.
+###
 
 use std log;
 
