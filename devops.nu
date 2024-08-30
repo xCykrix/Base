@@ -25,12 +25,12 @@ def "main setup" [] {
   main add-hook "commit-msg";
 
   # Configure hooksPath
-  git config core.hooksPath "./git-hooks";
+  git config core.hooksPath "./devops/hook";
   main update-github;
 
   # chmod
   if ((can_execute "chmod" false) == true) {
-    chmod +x git-hooks/*
+    chmod +x devops/hook/*
   }
 }
 
