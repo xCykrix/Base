@@ -23,6 +23,7 @@ def main [] {
   cp -rv $"($temp)/.editorconfig" .;
   cp -rv $"($temp)/devops/hook/commit-msg" ./devops/hook/commit-msg;
   rm ./devops-install.nu;
+  rm -rf $"($temp)";
   log info "Base devops.nu and devops-bin have been installed and updated. Running setup.";
   nu ./devops.nu setup;
 }
