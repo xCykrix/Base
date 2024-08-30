@@ -101,7 +101,7 @@ def "main upgrade" [] {
 def "main update-github" [] {
   conf;
 
-  let detail = (git remote get-url origin | into string | parse --regex '(?:https://|git@)github.com[/:]{1}([A-Za-z0-9]{1,})/([A-Za-z0-9]{1,})(?:.git)?')
+  let detail = (git remote get-url origin | into string | parse --regex '(?:https://|git@)github.com[/:]{1}([A-Za-z0-9]{1,})/([A-Za-z0-9_.-]{1,})(?:.git)?')
   if (($detail | length) == 0) {
     return (log error $"Invalid 'git remote get-url origin' response. Found '($detail)' but expected a git compatbile uri.");
   }
