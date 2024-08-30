@@ -11,6 +11,7 @@ const expression = '^(?:revert: )?(build|chore|ci|docs|feat|fix|perf|refactor|re
 
 def main [0?: string, 1?: string] {
   log info "git-hook[commit-msg]";
+  log info $"Expression: ($expression)"
 
   # Read Message
   let message: string = (open $0 | into string | str trim);
@@ -23,7 +24,7 @@ def main [0?: string, 1?: string] {
 
   # Exit Code
   if ($verified) {
-    log info "commit-msg passed-validated"
+    log info "commit-msg pass"
     return (exit 0);
   }
   return (error make --unspanned {

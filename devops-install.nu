@@ -12,14 +12,16 @@ def main [] {
 
   let temp = (mktemp -d)
   git clone https://github.com/xCykrix/Base.git $temp;
-  mkdir git-hooks;
+  mkdir devops/.state;
+  mkdir devops/conf;
+  mkdir devops/hook;
 
-  cp -rv $"($temp)/devops-bin" .;
+  cp -rv $"($temp)/devops/.state" .;
   cp -rv $"($temp)/devops.nu" .;
   cp -rv $"($temp)/devops-install.nu" .;
 
   cp -rv $"($temp)/.editorconfig" .;
-  cp -rv $"($temp)/git-hooks/commit-msg" ./git-hooks/commit-msg;
+  cp -rv $"($temp)/devops/hook/commit-msg" ./devops/hook/commit-msg;
   rm ./devops-install.nu;
   log info "Base devops.nu and devops-bin have been installed and updated. Running setup.";
   nu ./devops.nu setup;

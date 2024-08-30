@@ -5,9 +5,9 @@
 use std log;
 
 # module
-use "./devops-bin/execute.nu" [can_execute];
-use "./devops-bin/file.nu" [add, conf];
-use "./devops-bin/handle.nu" [fexit];
+use "./devops/.state/execute.nu" [can_execute];
+use "./devops/.state/file.nu" [add, conf];
+use "./devops/.state/handle.nu" [fexit];
 
 ### --- Setup State --- ###
 def "main setup" [] {
@@ -34,21 +34,21 @@ def "main setup" [] {
   }
 }
 
-### --- Execute a stage --- ###
+### --- Execute a Stage --- ###
 def "main run-stage" [id: int, description: string = '-'] {
   log info $"run-stage|start = './devops/stage-($id).nu';";
-  nu $"./devops-conf/stage-($id).nu";
+  nu $"./devops/conf/stage-($id).nu";
   let exit_code: int = $env.LAST_EXIT_CODE;
   fexit $exit_code $description;
 }
 
-### --- Create a stage --- ###
+### --- Create a Stage --- ###
 def "main add-stage" [id: int, description: string] {
   conf;
 
   log info $"add-stage|($id) ($description)";
   (add
-    $"devops-conf"
+    $"./devops/conf"
     $"stage-($id).nu"
     $'#!/usr/bin/env nu
       # stage-($id).nu [($description)]
@@ -73,7 +73,7 @@ def "main add-hook" [hook: string] {
 
   log info $"hook[create]|hook add ($hook)";
   (add
-    $"git-hooks"
+    $"./devops/hook"
     $"($hook)"
     $'#!/usr/bin/env nu
       # git-hook: ($hook)
@@ -107,12 +107,12 @@ def "main update-github" [] {
   }
 
   # Base APIs
-  gh api -X PATCH "/repos/{owner}/{repo}" --input devops-bin/scheme/repo.json | from json;
-  gh api -X PUT "/repos/{owner}/{repo}/branches/main/protection" --input devops-bin/scheme/branch-protection.json | from json;
+  gh api -X PATCH "/repos/{owner}/{repo}" --input devops/.state/scheme/repo.json | from json;
+  gh api -X PUT "/repos/{owner}/{repo}/branches/main/protection" --input devops/.state/scheme/branch-protection.json | from json;
   gh api -X POST "/repos/{owner}/{repo}/branches/main/protection/required_signatures" | from json;
 
   # Label states.
-  let expected = open devops-bin/scheme/label.json;
+  let expected = open devops/.state/scheme/label.json;
   let current = (gh label list --json name,color) | from json;
   mut create = [];
   mut delete = [];
