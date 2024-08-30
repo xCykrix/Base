@@ -89,7 +89,7 @@ def "main add-hook" [hook: string] {
           msg: "Failed to execute hook '($hook)'."
           help: "Please review the above output to resolve this issue."
         };
-      }' 4)
+      }' 6)
 }
 
 ### --- Upgrade Script from GitHub --- ###
