@@ -16,7 +16,7 @@ def main [] {
   mkdir devops/conf;
   mkdir devops/hook;
 
-  cp -rv $"($temp)/devops/.state" .;
+  cp -rv $"($temp)/devops/.state" ./devops/;
   cp -rv $"($temp)/devops.nu" .;
   cp -rv $"($temp)/devops-install.nu" .;
 
