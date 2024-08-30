@@ -1,6 +1,6 @@
 
 export def conf [] {
-  mkdir devops/bin
+  mkdir devops/.state
   mkdir devops/conf
   mkdir devops/hook
 }
