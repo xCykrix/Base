@@ -8,8 +8,4 @@ def main [] {
 
   # Default Stage Error
   log warning "default stage has not yet been configured"
-  error make --unspanned {
-    msg: "Failed to execute stage [30] 'test'."
-    help: "Please review the above output to resolve this issue." 
-  };
 }

@@ -1,15 +1,11 @@
 #!/usr/bin/env nu
-# stage-10.nu [validate]
+# stage-10.nu [lint]
 
 use std log
 
 def main [] {
-  log info "stage-10.nu [validate]";
+  log info "stage-10.nu [lint]";
 
   # Default Stage Error
   log warning "default stage has not yet been configured"
-  error make --unspanned {
-    msg: "Failed to execute stage [10] 'validate'."
-    help: "Please review the above output to resolve this issue." 
-  };
 }

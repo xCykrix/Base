@@ -12,6 +12,7 @@ def main [] {
 
   let temp = (mktemp -d)
   git clone https://github.com/xCykrix/Base.git $temp;
+  rm -rf devops/.state;
   mkdir devops/.state;
   mkdir devops/conf;
   mkdir devops/hook;
