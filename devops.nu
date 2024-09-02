@@ -124,6 +124,23 @@ def "main update-github" [] {
   gh api -X PUT "/repos/{owner}/{repo}/branches/main/protection" --input devops/.state/scheme/branch-protection.json | from json;
   gh api -X POST "/repos/{owner}/{repo}/branches/main/protection/required_signatures" | from json;
 
+  # Read Webhooks
+  # TODO: Git Webhook Support
+  # let hooks = (gh api -X GET "/repos/{owner}/{repo}/hooks" | from json)
+  # mut has = false;
+  # for $hook in $hooks {
+  #   if (($hook | get config | get url | str contains "1275197112392482817") == true) {
+  #     $has = true;
+  #   }
+  # }
+  # if ($has == true) {
+  #   print true
+  #   gh api -X PATCH
+  # } else {
+  #   print false
+  #   gh api -X POST
+  # }
+
   # Label states.
   let expected = open devops/.state/scheme/label.json;
   let current = (gh label list --json name,color) | from json;
